@@ -1,0 +1,3 @@
+[submodule "vendor/template"]
+	path = vendor/template
+	url = git@github.com:patthadon-p/cedt-latex-template.git

@@ -1,0 +1,34 @@
+.venv
+
+**/__pycache__
+*:Zone.Identifier
+
+**/.build/*.aux
+**/.build/*.fdb_latexmk
+**/.build/*.fls
+**/.build/*.log
+**/.build/*.out
+**/.build/*.toc
+**/.build/*.listing
+**/.build/*.xdv
+
+# Some latexmk/pdflatex combos fall back to emulating -aux-directory and
+# leave a duplicate copy of these files next to the .tex source.
+**/*.aux
+**/*.fdb_latexmk
+**/*.fls
+**/*.log
+**/*.out
+**/*.toc
+**/*.listing
+**/*.synctex.gz
+**/*.xdv
+
+**/indent.log
+
+# latexindent backup files (see `make fmt`), redirected into .build/
+**/.build/*.bak
+**/*.bak
+
+# Ignore all source directories
+**/src
