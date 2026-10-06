@@ -1,0 +1,115 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            e6:38:51:ea:9b:47:2c:6a:4b:f1:24:ce:93:64:6b:cf
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C = GB, O = Sectigo Limited, CN = Sectigo Public Server Authentication CA DV R36
+        Validity
+            Not Before: Jan  5 00:00:00 2026 GMT
+            Not After : Feb  5 23:59:59 2027 GMT
+        Subject: CN = *.chula.ac.th
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:a9:96:9b:d4:64:b8:b3:83:e7:75:fc:a6:7e:aa:
+                    2e:1f:28:92:03:78:c7:93:9e:81:f4:3b:7e:b3:94:
+                    74:3d:86:4d:2a:7e:4d:c9:93:8d:9d:1a:e2:31:b9:
+                    af:7d:88:eb:ed:c4:f2:73:49:eb:ce:87:8f:97:15:
+                    4e:4c:87:0c:f8:0b:d5:0a:1a:88:7d:de:d4:18:a0:
+                    ad:3f:07:19:a3:a4:66:39:ad:e3:0a:db:fa:ea:eb:
+                    73:31:f4:d0:1d:a5:14:22:37:ea:48:72:d5:72:04:
+                    23:f6:8b:75:52:25:d7:91:58:4c:c3:1b:97:12:b2:
+                    3b:53:a0:ed:93:99:fe:cd:7b:b3:a2:3d:a8:fa:c5:
+                    e5:89:67:3b:da:0a:31:7e:09:f5:48:dd:4b:6d:60:
+                    c7:6f:02:40:b6:94:e6:f5:77:b7:c0:7a:0d:40:1f:
+                    09:6b:4b:27:7f:c4:73:c5:d5:cb:85:61:cc:3d:2d:
+                    c5:d4:b4:8d:d4:09:4a:72:83:8e:56:d8:81:6e:4e:
+                    8b:2f:06:3e:40:df:97:97:39:27:86:dd:79:17:3d:
+                    6e:11:bd:f9:bc:10:06:76:03:05:9b:4b:85:db:a4:
+                    f3:88:15:59:4e:38:53:a3:5b:6d:74:ab:c5:6a:f4:
+                    e8:71:10:22:fc:82:a2:d7:61:cf:54:6b:29:69:42:
+                    ea:85
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                68:C0:12:16:18:0E:AF:CE:F6:87:A6:32:57:A3:46:51:5D:CB:07:27
+            X509v3 Subject Key Identifier: 
+                7E:93:27:B2:6E:C5:F5:1F:83:04:7D:4A:DB:08:84:D3:A5:3F:E0:DE
+            X509v3 Key Usage: critical
+                Digital Signature, Key Encipherment
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication
+            X509v3 Certificate Policies: 
+                Policy: 1.3.6.1.4.1.6449.1.2.2.7
+                  CPS: https://sectigo.com/CPS
+                Policy: 2.23.140.1.2.1
+            Authority Information Access: 
+                CA Issuers - URI:http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt
+                OCSP - URI:http://ocsp.sectigo.com
+            X509v3 Subject Alternative Name: 
+                DNS:*.chula.ac.th, DNS:chula.ac.th
+            CT Precertificate SCTs: 
+                Signed Certificate Timestamp:
+                    Version   : v1 (0x0)
+                    Log ID    : 60:4C:9A:AF:7A:7F:77:5F:01:D4:06:FC:92:0D:C8:99:
+                                EB:0B:1C:7D:F8:C9:52:1B:FA:FA:17:77:3B:97:8B:C9
+                    Timestamp : Jan  5 06:20:16.141 2026 GMT
+                    Extensions: none
+                    Signature : ecdsa-with-SHA256
+                                30:45:02:21:00:93:5F:D9:9C:A7:75:62:AD:4B:99:C1:
+                                04:E4:46:02:DF:B2:D8:28:4B:57:07:92:E3:D0:65:CA:
+                                6E:C9:49:75:A9:02:20:10:61:AB:12:0A:A2:45:B5:EC:
+                                F1:F7:7D:4A:01:C8:FE:BF:90:63:1B:BB:1E:83:A7:F6:
+                                74:EB:7C:DC:C3:89:1D
+                Signed Certificate Timestamp:
+                    Version   : v1 (0x0)
+                    Log ID    : 8E:CA:47:0B:AC:DE:6A:F3:A2:06:B0:A4:7A:84:B7:46:
+                                FE:1F:C6:BF:95:3E:25:E6:9B:4E:E4:02:48:F3:C6:E8
+                    Timestamp : Jan  5 06:20:16.186 2026 GMT
+                    Extensions: 00:00:05:00:01:10:E1:49
+                    Signature : ecdsa-with-SHA256
+                                30:46:02:21:00:E5:3B:5F:DD:EA:6F:0F:B9:9F:16:4B:
+                                0A:2A:28:32:D7:02:12:DE:4F:E6:17:B2:EA:DC:B0:43:
+                                A9:FB:FC:28:70:02:21:00:8C:70:B2:90:6D:5E:F2:77:
+                                4A:A8:A6:79:BF:F9:59:E2:83:B8:DF:F6:A3:42:3B:63:
+                                84:F5:02:3E:9D:04:09:CF
+                Signed Certificate Timestamp:
+                    Version   : v1 (0x0)
+                    Log ID    : 59:6E:6C:33:86:94:B2:59:72:A2:56:C8:A0:E8:DD:90:
+                                4A:76:E8:08:3D:DA:87:3B:01:08:38:28:14:3C:EE:59
+                    Timestamp : Jan  5 06:20:16.050 2026 GMT
+                    Extensions: 00:00:05:00:00:07:CC:F5
+                    Signature : ecdsa-with-SHA256
+                                30:44:02:20:45:91:8F:0B:8C:DA:BE:2A:E6:59:7B:2A:
+                                A0:52:55:8E:9B:5D:93:F3:F6:D6:C9:86:DC:CB:EA:05:
+                                BD:BB:8E:43:02:20:66:D9:10:81:3B:0A:1E:18:09:8D:
+                                2F:70:D8:A8:68:E4:89:FB:94:ED:23:21:66:22:0E:D4:
+                                5C:81:8E:A1:29:14
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        60:77:e2:84:04:44:36:d4:bb:19:9d:db:9c:9a:09:fe:2b:f4:
+        de:ac:ad:b7:53:a1:b9:43:65:47:18:57:38:69:8f:f0:f7:ac:
+        1c:95:05:fe:df:9a:31:f0:ff:77:f5:58:fd:79:19:a6:35:99:
+        c2:c2:60:fd:04:a6:09:5d:72:1e:b7:4b:42:b9:49:45:b9:1f:
+        f1:45:8b:59:b1:5f:1f:33:4d:b2:64:4c:1c:7a:60:9e:e6:7f:
+        71:9b:94:dc:42:f7:2e:8e:78:d2:c8:4a:d5:c5:d4:14:de:14:
+        38:4c:33:8d:47:0f:00:5d:7d:d5:e7:c3:25:b0:29:8c:9f:21:
+        4d:44:c8:6d:ef:f0:47:5f:67:4c:fc:da:c8:0d:01:4d:52:7f:
+        f3:13:db:c3:cd:6e:f4:65:12:ec:1b:55:1f:1c:ff:ea:27:21:
+        48:9a:06:ca:58:c6:32:1a:7c:51:0f:6f:c3:0c:b9:38:52:ba:
+        09:68:55:8c:77:8b:c1:f0:63:26:b7:91:dd:10:3d:eb:70:83:
+        6f:84:81:d9:69:d2:6b:21:93:4d:c3:dd:a6:11:1f:33:ee:80:
+        ed:2c:e3:7f:45:45:28:a0:c9:c9:4f:2c:6d:60:84:3a:68:c8:
+        62:da:2a:8c:b3:9f:2c:d3:32:b3:32:9d:b5:d7:e3:f9:b0:15:
+        2b:dd:0f:32:7a:e9:7e:28:2c:24:56:17:ed:ea:40:11:28:6b:
+        cc:32:0b:bc:98:a9:7a:ae:a8:d2:9b:2e:68:34:c4:0c:5b:32:
+        f6:49:0b:2c:66:1a:f7:7c:2e:97:1c:a8:0d:7f:b1:c0:ed:79:
+        82:3d:49:01:5c:b4:7e:91:8c:6d:15:23:6b:18:9e:08:52:08:
+        df:5e:dc:f6:05:32:70:bb:8b:dd:f4:96:d1:19:d7:38:67:42:
+        70:8b:40:00:31:5e:db:3f:bd:51:b8:a9:c0:98:b3:1f:72:e1:
+        95:1a:36:1c:4e:7b:34:50:a2:39:40:17:f9:c0:14:4d:dd:b2:
+        4a:0e:cd:6a:86:a5

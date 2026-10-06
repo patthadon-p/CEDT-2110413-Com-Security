@@ -1,0 +1,6 @@
+www.chula.ac.th                          Certificate verified
+google.com                               Certificate verified
+classdeedee.cloud.cp.eng.chula.ac.th     Certificate verified
+self-signed.badssl.com                   NOT verified: self-signed certificate
+www_chula_ac_th.cert + intermediate.pem  (True, 'OK')
+www_chula_ac_th.cert (no intermediate)   (False, 'unable to get local issuer certificate')

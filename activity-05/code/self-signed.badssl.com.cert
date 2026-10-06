@@ -1,0 +1,70 @@
+-----BEGIN CERTIFICATE-----
+MIIDeTCCAmGgAwIBAgIJAPsTsv6z4a0TMA0GCSqGSIb3DQEBCwUAMGIxCzAJBgNV
+BAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNp
+c2NvMQ8wDQYDVQQKDAZCYWRTU0wxFTATBgNVBAMMDCouYmFkc3NsLmNvbTAeFw0y
+NjA5MjkyMTAxNDNaFw0yODA5MjgyMTAxNDNaMGIxCzAJBgNVBAYTAlVTMRMwEQYD
+VQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQK
+DAZCYWRTU0wxFTATBgNVBAMMDCouYmFkc3NsLmNvbTCCASIwDQYJKoZIhvcNAQEB
+BQADggEPADCCAQoCggEBAMIE7PiM7gTCs9hQ1XBYzJMY61yoaEmwIrX5lZ6xKyx2
+PmzAS2BMTOqytMAPgLaw+XLJhgL5XEFdEyt/ccRLvOmULlA3pmccYYz2QULFRtMW
+hyefdOsKnRFSJiFzbIRMeVXk0WvoBj1IFVKtsyjbqv9u/2CVSndrOfEk0TG23U3A
+xPxTuW1CrbV8/q71FdIzSOciccfCFHpsKOo3St/qbLVytH5aohbcabFXRNsKEqve
+ww9HdFxBIuGa+RuT5q0iBikusbpJHAwnnqP7i/dAcgCskgjZjFeEU4EFy+b+a1SY
+QCeFxxC7c3DvaRhBB0VVfPlkPz0sw6l865MaTIbRyoUCAwEAAaMyMDAwCQYDVR0T
+BAIwADAjBgNVHREEHDAaggwqLmJhZHNzbC5jb22CCmJhZHNzbC5jb20wDQYJKoZI
+hvcNAQELBQADggEBAFthHw140Q4cJPxGa2/C16ndMkq0Q5nDHGSOEuLWvC+QKbyC
+ZZa8gus/ACu8fwkJ3q7Tbv/C8MUDMmmjvvhjUl7AVVcnnjg/LLR7G2bmU5pbWDzE
+PwQtNerlEZiAJt9PjIOPIV3tF+5Z5iVdWEqsSwkqXesTDtWRwZs0sAsPXBdqnGto
+pvoKUf7pOXVsw8fcW9XC6FwWuJhhjGXIhb63NaUB86FFkjI/wxeNaCOXIWW9dhcz
+CQWfgOBTANn25tXBg4gpUb/ADCmRscJCksoyHdRj8TCzM3v/TphSgXD1RST1NtiX
+thxe/B7QTZiRfYc0Tq/nWwOQXXOgJ2iicmJe91o=
+-----END CERTIFICATE-----
+---
+Server certificate
+subject=C = US, ST = California, L = San Francisco, O = BadSSL, CN = *.badssl.com
+issuer=C = US, ST = California, L = San Francisco, O = BadSSL, CN = *.badssl.com
+---
+No client certificate CA names sent
+Peer signing digest: SHA512
+Peer signature type: RSA
+Server Temp Key: ECDH, prime256v1, 256 bits
+---
+SSL handshake has read 1599 bytes and written 450 bytes
+Verification error: self-signed certificate
+---
+New, TLSv1.2, Cipher is ECDHE-RSA-AES128-GCM-SHA256
+Server public key is 2048 bit
+Secure Renegotiation IS supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+SSL-Session:
+    Protocol  : TLSv1.2
+    Cipher    : ECDHE-RSA-AES128-GCM-SHA256
+    Session-ID: 717C6982E95D4CC95D303DE4F4B4E24B13AE957FB02EB5E45854014187463993
+    Session-ID-ctx: 
+    Master-Key: F77D917618DD1025F2F337F7A4A41ABE8C36A321DDBE65B06476733F66EC0C3005F41346F5867AF1879042AEC30DE1BE
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket:
+    0000 - 73 06 52 69 fa 9c 33 c0-1f aa f4 93 86 5d 61 e0   s.Ri..3......]a.
+    0010 - 6c 50 02 72 24 9c 51 fa-8a e6 fb cb 9b 21 3f 00   lP.r$.Q......!?.
+    0020 - 0f b7 a1 58 00 96 b2 08-14 de f8 30 17 9a 58 37   ...X.......0..X7
+    0030 - e9 ff c6 bb a0 3c 2d c7-54 a8 f1 3c a1 81 bc 1c   .....<-.T..<....
+    0040 - 32 75 2f 0e 01 14 29 23-c4 5d 63 14 fb cd 46 c2   2u/...)#.]c...F.
+    0050 - b2 f1 f2 99 f0 6c 66 4a-ee e7 26 31 dc c7 9c 42   .....lfJ..&1...B
+    0060 - 53 6d 7e df ae 0b ae 62-66 82 a7 bd c1 09 a2 ae   Sm~....bf.......
+    0070 - d8 e5 59 46 88 dd 44 6f-24 2d a8 aa 05 b7 81 68   ..YF..Do$-.....h
+    0080 - 77 66 f3 4f fd ed 52 49-a9 fa 4f 50 89 f2 11 9a   wf.O..RI..OP....
+    0090 - 4c 5d 28 f4 5f f1 83 63-99 6d 1c f1 4e 11 fc a3   L](._..c.m..N...
+    00a0 - b4 ce 83 0a 4c c7 d9 cf-4a 40 a2 22 da 28 ff 47   ....L...J@.".(.G
+    00b0 - 19 75 a1 79 10 6c 69 f7-fa e0 55 29 e8 37 c2 ca   .u.y.li...U).7..
+    00c0 - be 62 cb 5f 30 da b8 33-d6 f7 cd 37 3b f3 88 d8   .b._0..3...7;...
+
+    Start Time: 1791276842
+    Timeout   : 7200 (sec)
+    Verify return code: 18 (self-signed certificate)
+    Extended master secret: no
+---
