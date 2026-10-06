@@ -41,22 +41,22 @@ Instead, we will use a popular tool, Splunk, to help us with our job.
 
 \begin{enumerate}
 	\item You will use Splunk, a popular log analysis tool, that you can download from: \\
-				\href{http://www.splunk.com/}{http://www.splunk.com/} → Choose Free Splunk → Software Download → Download Splunk Enterprise.
-				You will need to provide your information to Splunk before you download.
-				Download and install Splunk Enterprise on your computer and start running it
-				(Start Splunk Enterprise and launch Splunk Web).
+	      \href{http://www.splunk.com/}{http://www.splunk.com/} → Choose Free Splunk → Software Download → Download Splunk Enterprise.
+	      You will need to provide your information to Splunk before you download.
+	      Download and install Splunk Enterprise on your computer and start running it
+	      (Start Splunk Enterprise and launch Splunk Web).
 	\item In your browser, go to your newly installed Splunk Web on your computer at:
-				\href{http://localhost:8000}{http://localhost:8000}.
+	      \href{http://localhost:8000}{http://localhost:8000}.
 	\item Import the data downloaded above (the entire zip file)
-				into Splunk following these steps (Add Data, Use Segment in Path to identify Host). \\
-				\textbf{\underline{WARNING:}} do this only once or you will have multiple copies of the data in your analysis,
-				and your count will be incorrect.
-				Look at how to load data in the example in this link first... \\
-				\small{\href{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}} \\
-				After the import, if you cannot see the data, look at the time frame of your analysis and select as far back in time as possible.
-				The default is only 24 hours. \\
-				\textcolor{red}{You must use only the data set I provided.
-				Using other data sets will have different results when grading.}
+	      into Splunk following these steps (Add Data, Use Segment in Path to identify Host). \\
+	      \textbf{\underline{WARNING:}} do this only once or you will have multiple copies of the data in your analysis,
+	      and your count will be incorrect.
+	      Look at how to load data in the example in this link first... \\
+	      \small{\href{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}} \\
+	      After the import, if you cannot see the data, look at the time frame of your analysis and select as far back in time as possible.
+	      The default is only 24 hours. \\
+	      \textcolor{red}{You must use only the data set I provided.
+		      Using other data sets will have different results when grading.}
 \end{enumerate}
 
 % ================================================================================ %
@@ -151,7 +151,7 @@ What time do hackers appear to try to hack our servers?
 	so the attack is a short burst that happens at the same time every day.
 	This looks like a scheduled script (e.g.\ a cron job) that runs in the evening when the admins are probably not watching.
 	The busiest day is 19 Aug (5{,}006 attempts); the first and last days are smaller because the log starts/ends in the middle of the period.
-	
+
 	\myspace
 
 	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
@@ -181,12 +181,12 @@ Which server (\texttt{mailsv}, \texttt{www1}, \texttt{www2}, \texttt{www3}) had 
 	\begin{center}
 		\begin{tabular}{lr}
 			\toprule
-			Host & Attempts \\
+			Host            & Attempts \\
 			\midrule
-			\texttt{www1} & 8{,}746 \\
-			\texttt{www3} & 8{,}220 \\
-			\texttt{mailsv} & 8{,}111 \\
-			\texttt{www2} & 7{,}992 \\
+			\texttt{www1}   & 8{,}746  \\
+			\texttt{www3}   & 8{,}220  \\
+			\texttt{mailsv} & 8{,}111  \\
+			\texttt{www2}   & 7{,}992  \\
 			\bottomrule
 		\end{tabular}
 	\end{center}
@@ -206,12 +206,12 @@ What is the most popular account that hackers use to try to break in?
 
 \begin{solution}
 	\noindent \textbf{Answer: \texttt{root}} with 1{,}493 attempts, followed by \texttt{administrator} (1{,}020) and \texttt{admin} (938).
-	
+
 	\myspace
 
 	These are the default/privileged account names that exist on almost every system, so they are the first guesses in a dictionary attack.
 	In total the hackers tried 151 different usernames, and 24{,}011 of the attempts (73\%) were for \texttt{invalid user}s, i.e.\ accounts that do not even exist on our servers.
-	
+
 	\myspace
 
 	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
@@ -306,11 +306,11 @@ Can you find any bots crawling our websites?
 	\begin{center}
 		\begin{tabular}{lrrl}
 			\toprule
-			Bot & Requests & Distinct IPs & What it is \\
+			Bot                      & Requests & Distinct IPs & What it is            \\
 			\midrule
-			Googlebot (3 UA strings) & 1{,}466 & 119 & Google search crawler \\
-			NetcraftSurveyAgent      & 497     & 53  & Netcraft web survey \\
-			YandexBot                & 383     & 50  & Yandex search crawler \\
+			Googlebot (3 UA strings) & 1{,}466  & 119          & Google search crawler \\
+			NetcraftSurveyAgent      & 497      & 53           & Netcraft web survey   \\
+			YandexBot                & 383      & 50           & Yandex search crawler \\
 			\bottomrule
 		\end{tabular}
 	\end{center}
@@ -349,7 +349,7 @@ What are they doing on the site?
 		      By the \texttt{action} field they \texttt{addtocart} 359 times and \texttt{purchase} 338 times.
 		      A crawler should never fill forms or buy things.
 		\item \textbf{Probing sensitive files:} 12 bot requests went to \\
-					\texttt{/rush/signals.zip}, \texttt{/hidden/anna\_nicole.html} and \texttt{/passwords.pdf}.
+		      \texttt{/rush/signals.zip}, \texttt{/hidden/anna\_nicole.html} and \texttt{/passwords.pdf}.
 		\item \textbf{Fake identity:} none of the 1{,}466 ``Googlebot'' requests come from Google's crawler range \texttt{66.249.64.0/19};
 		      they come from 119 random IPs.
 		      The User-Agent header is just text that the client chooses, so these are most likely scrapers/attackers \textbf{pretending to be bots}.
