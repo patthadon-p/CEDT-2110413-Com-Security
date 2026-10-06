@@ -1,0 +1,389 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+% Splunk screenshot inside a solution box (a float [H] figure does not work in the breakable box)
+\newcommand{\shot}[2]{%
+	\begin{center}
+		\includegraphics[width=0.9\linewidth]{images/splunk/#1.png} \\
+		\refstepcounter{figure}\label{fig:#1}\footnotesize Figure~\thefigure: #2
+	\end{center}}
+
+\begin{document}
+\subject
+\asgntitle{3}{}{Log Analysis}{}{\DefaultCollaborators}
+
+% ================================================================================ %
+\section*{Overview}
+% ================================================================================ %
+
+\par Suppose you are on the security/incident management team of a (supposed) company named buttercup.
+You have access to a set of \textbf{system logs} (\texttt{secure.log})
+and \textbf{web logs} (\texttt{access.log}) from your company infrastructure consisting of:
+\begin{itemize}
+	\item 1 mail server named \texttt{mailsv}
+	\item 3 web servers named \texttt{www1}, \texttt{www2}, \texttt{www3}
+\end{itemize}
+
+\par It is your job to identify successful/failed attempts to hack, scan, login, or access protected information on the servers.
+
+\par \textbf{The logs are at the google drive link I posted on Discord.}
+Reading/parsing the logs manually will be \underline{PAINFUL}.
+You could write code to do this, but that will also take some time and effort.
+Instead, we will use a popular tool, Splunk, to help us with our job.
+\fig[0.4\linewidth]{images/magic_quadrant.png}{Magic Quadrant for Security Information and Event Management}{fig:magic_quadrant}
+
+% ================================================================================ %
+\section*{Getting Started}
+% ================================================================================ %
+
+\begin{enumerate}
+	\item You will use Splunk, a popular log analysis tool, that you can download from: \\
+				\href{http://www.splunk.com/}{http://www.splunk.com/} → Choose Free Splunk → Software Download → Download Splunk Enterprise.
+				You will need to provide your information to Splunk before you download.
+				Download and install Splunk Enterprise on your computer and start running it
+				(Start Splunk Enterprise and launch Splunk Web).
+	\item In your browser, go to your newly installed Splunk Web on your computer at:
+				\href{http://localhost:8000}{http://localhost:8000}.
+	\item Import the data downloaded above (the entire zip file)
+				into Splunk following these steps (Add Data, Use Segment in Path to identify Host). \\
+				\textbf{\underline{WARNING:}} do this only once or you will have multiple copies of the data in your analysis,
+				and your count will be incorrect.
+				Look at how to load data in the example in this link first... \\
+				\small{\href{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/GetthetutorialdataintoSplunk}} \\
+				After the import, if you cannot see the data, look at the time frame of your analysis and select as far back in time as possible.
+				The default is only 24 hours. \\
+				\textcolor{red}{You must use only the data set I provided.
+				Using other data sets will have different results when grading.}
+\end{enumerate}
+
+% ================================================================================ %
+\section*{Understand the Data}
+% ================================================================================ %
+
+Use Splunk's ``Search'' feature to explore the data. \\
+\href{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/Aboutthesearchapp}{http://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/Aboutthesearchapp}
+
+\myspace
+
+\noindent\textbf{My setup.} I installed Splunk Enterprise 9.4.1 and imported \texttt{tutorialdata.zip} \underline{once},
+taking the host name from the folder in the path (\texttt{mailsv}, \texttt{www1}, \texttt{www2}, \texttt{www3}, \texttt{vendor\_sales}).
+All searches below use the time range \textbf{All time}.
+The event counts match the number of lines in each log file, so the data was imported exactly once.
+Splunk parses \texttt{access.log} automatically (sourcetype \texttt{access\_combined\_wcookie}, with fields such as
+\texttt{clientip}, \texttt{uri\_path}, \texttt{status}, \texttt{useragent}),
+but for \texttt{secure.log} (sourcetype \texttt{secure-2}) I extract \texttt{user} and \texttt{src\_ip} myself with \texttt{rex}.
+\fig[0.75\linewidth]{images/splunk/p0-import.png}{Imported events per host and sourcetype}{p0-import}
+
+% ================================================================================ %
+\section*{\textbf{Part I.} Can you find people trying to break into the servers?}
+% ================================================================================ %
+
+Use Splunk's ``Search'' feature to try to answer the questions below.
+
+\noindent \textbf{Hint 1:} On linux servers, \texttt{secure.log} contains security-related information.
+Typically in response to incidents, it is one of the first files people look at to see if there are compromises.
+Read this to see what to look for on Linux (this \texttt{secure.log} file is available in google drive). \\
+\href{https://zeltser.com/security-incident-log-review-checklist/}{https://zeltser.com/security-incident-log-review-checklist/}
+
+\noindent \textbf{Hint 2:} To process the logs for analysis,
+first parse it using regular expressions to ``extract fields'' and turn unstructured data into structured data.
+
+\myspace
+
+Answer the following questions and provide evidence with your answer.
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+How many hackers are trying to get access to our servers?
+And how many attempts are there?
+Explain/define how you count distinct hackers.
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: 182 hackers made 33{,}069 failed login attempts.}
+
+	\myspace
+
+	\textbf{How I count a hacker.}
+	Every failed SSH login in \texttt{secure.log} looks like
+	\texttt{Failed password for [invalid user] <user> from <ip> port <port> ssh2}.
+	I extract the source IP with \texttt{rex} and treat \textbf{one distinct external source IP = one hacker}.
+	The three internal IPs (\texttt{10.x.x.x}) are \underline{not} counted because they belong to our own staff:
+	they log in successfully hundreds of times and only fail occasionally (typos), see Figure~\ref{fig:p1-internal}.
+	No external IP ever has an \texttt{Accepted password} line, so all 33{,}069 attempts failed.
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+index=main sourcetype=secure-2 "failed password"
+| rex "for (invalid user )?(?<user>\S+) from (?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| search NOT src_ip="10.*"
+| stats count AS attempts dc(src_ip) AS distinct_hackers
+\end{codingbox*}
+	\shot{p1-count}{Number of attempts and distinct hacker IPs}
+	\shot{p1-internal}{Internal IPs: mostly successful logins (employees), so excluded}
+	\shot{p1-topip}{Top 10 hacker IPs (\texttt{| top limit=10 src\_ip})}
+
+	Each hacker IP tried between 63 and 948 times (about 182 on average), which is clearly an automated brute-force/dictionary attack, not a user mistyping a password.
+	\textbf{Limitation:} counting by IP is only an estimate.
+	One attacker can use many IPs (botnet/proxies), and one IP can be shared by many people (NAT).
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 02                                    %
+% ================================================================================ %
+\begin{problem}
+What time do hackers appear to try to hack our servers?
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: every night at about 20:29 (8:29 PM), from 16 to 23 Aug 2026.}
+
+	\myspace
+
+	All 33{,}069 attempts fall between \texttt{20:29:35} and \texttt{20:29:38} of each day,
+	so the attack is a short burst that happens at the same time every day.
+	This looks like a scheduled script (e.g.\ a cron job) that runs in the evening when the admins are probably not watching.
+	The busiest day is 19 Aug (5{,}006 attempts); the first and last days are smaller because the log starts/ends in the middle of the period.
+	
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+... | eval day=strftime(_time,"%Y-%m-%d"), time=strftime(_time,"%H:%M")
+| chart count over day by time
+... | timechart span=1h count
+\end{codingbox*}
+	(\texttt{...} is the same base search as Problem 1.)
+	\shot{p2-day}{Attempts per day: the only time column is 20:29}
+	\shot{p2-chart}{Timechart (1-hour buckets): one spike per day}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 03                                    %
+% ================================================================================ %
+\begin{problem}
+Which server (\texttt{mailsv}, \texttt{www1}, \texttt{www2}, \texttt{www3}) had the most attempts?
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: \texttt{www1}} with 8{,}746 attempts (26.4\%).
+
+	\myspace
+
+	The attack is spread almost evenly across all servers, so the hackers are scanning everything:
+	\begin{center}
+		\begin{tabular}{lr}
+			\toprule
+			Host & Attempts \\
+			\midrule
+			\texttt{www1} & 8{,}746 \\
+			\texttt{www3} & 8{,}220 \\
+			\texttt{mailsv} & 8{,}111 \\
+			\texttt{www2} & 7{,}992 \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+... | stats count by host | sort -count
+\end{codingbox*}
+	\shot{p3-host}{Failed attempts by host}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 04                                    %
+% ================================================================================ %
+\begin{problem}
+What is the most popular account that hackers use to try to break in?
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: \texttt{root}} with 1{,}493 attempts, followed by \texttt{administrator} (1{,}020) and \texttt{admin} (938).
+	
+	\myspace
+
+	These are the default/privileged account names that exist on almost every system, so they are the first guesses in a dictionary attack.
+	In total the hackers tried 151 different usernames, and 24{,}011 of the attempts (73\%) were for \texttt{invalid user}s, i.e.\ accounts that do not even exist on our servers.
+	
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+... | top limit=10 user
+\end{codingbox*}
+	\shot{p4-user}{Top 10 usernames used by hackers}
+\end{solution}
+% ================================================================================ %
+
+\newpage
+
+% ================================================================================ %
+\section*{\textbf{Part II.} Sensitive Files on Web Servers}
+% ================================================================================ %
+
+\noindent \textbf{Hint:} On web servers, \texttt{access.log} contains web access-related information.
+Typically in response to incidents, it is one of the first files people look at to see if there are compromises.
+Read this to see what to look for on Web Servers. \\
+\href{https://zeltser.com/security-incident-log-review-checklist/}{https://zeltser.com/security-incident-log-review-checklist/}
+
+% ================================================================================ %
+%                                    Problem 05                                    %
+% ================================================================================ %
+\begin{problem}
+Can you find attempts to get access to sensitive information from our web servers?
+How many attempts were there?
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: yes, 212 attempts} (from 118 different IPs) to download sensitive files, and \textbf{none of them succeeded} (all returned \texttt{404 Not Found}).
+
+	\myspace
+
+	Normal customers only use the shop pages (\texttt{/product.screen}, \texttt{/category.screen}, \texttt{/cart.do}, \texttt{/oldlink}, \texttt{/cart/*.do}).
+	Filtering those out leaves 610 requests to pages that do not exist on the site, and every one of them got \texttt{404}.
+	This is someone probing the web servers for hidden files.
+	The ones that are clearly after sensitive data are \texttt{/passwords.pdf}, \texttt{/hidden/anna\_nicole.html}, and \texttt{/rush/signals.zip}:
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+index=main sourcetype=access_combined_wcookie
+  NOT uri_path IN ("/product.screen","/cart.do","/category.screen",
+                   "/oldlink","/cart/success.do","/cart/error.do")
+| stats count by uri_path status
+
+index=main sourcetype=access_combined_wcookie
+  uri_path IN ("/passwords.pdf","/hidden/anna_nicole.html","/rush/signals.zip")
+| stats count dc(clientip) AS distinct_ips values(status) AS status by uri_path
+
+\myspace
+
+\end{codingbox*}
+	\shot{p5-odd}{All requests outside the normal shop pages (all 404)}
+	\shot{p5-sensitive}{Requests for sensitive files}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 06                                    %
+% ================================================================================ %
+\begin{problem}
+What resource/file are hackers looking for?
+\end{problem}
+
+\begin{solution}
+	The main target is \textbf{\texttt{/passwords.pdf}} (68 requests), a file that would contain passwords.
+	They also look for a hidden page \texttt{/hidden/anna\_nicole.html} (73) and an archive \texttt{/rush/signals.zip} (71),
+	which could contain internal/confidential data.
+	The other 404 paths (\texttt{show.do}, \texttt{search.do}, \texttt{/productscreen.html}, \texttt{/numa/numa.html}, \texttt{/stuff/logo.ico})
+	look like guessing common page names to discover what exists on the server.
+	\shot{p6-events}{Raw events requesting \texttt{/passwords.pdf} (status 404)}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+\section*{\textbf{Part III.} Are there bots crawling our websites?}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 07                                    %
+% ================================================================================ %
+\begin{problem}
+Can you find any bots crawling our websites?
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Answer: yes, 2{,}346 requests (about 5.9\% of all web traffic) come from 3 bots}, found by searching the User-Agent for \texttt{bot}/\texttt{Netcraft}:
+
+	\myspace
+
+	\begin{center}
+		\begin{tabular}{lrrl}
+			\toprule
+			Bot & Requests & Distinct IPs & What it is \\
+			\midrule
+			Googlebot (3 UA strings) & 1{,}466 & 119 & Google search crawler \\
+			NetcraftSurveyAgent      & 497     & 53  & Netcraft web survey \\
+			YandexBot                & 383     & 50  & Yandex search crawler \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+index=main sourcetype=access_combined_wcookie
+  (useragent="*bot*" OR useragent="*Netcraft*")
+| eval bot=case(like(useragent,"%Googlebot%"),"Googlebot",
+                like(useragent,"%YandexBot%"),"YandexBot",
+                like(useragent,"%Netcraft%"),"Netcraft")
+| stats count dc(clientip) AS distinct_ips by bot, useragent
+\end{codingbox*}
+
+	\myspace
+
+	\shot{p7-bots}{Bots found from the User-Agent field}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 08                                    %
+% ================================================================================ %
+\begin{problem}
+What are they doing on the site?
+(\textit{Hint:} Look for User-Agent in the web \texttt{access.log}s.)
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Mostly crawling the shop}, but some of the behaviour is not what a real search-engine bot does.
+	\begin{itemize}
+		\item \textbf{Crawling/indexing (normal):} most requests are \texttt{GET} on product, category and old-link pages
+		      (\texttt{/product.screen} 461, \texttt{/oldlink} 354, \texttt{/category.screen} 315), i.e.\ reading the catalogue to index it.
+		\item \textbf{Using the shopping cart (suspicious):} they also \texttt{POST} to \texttt{/cart.do} and \texttt{/cart/success.do}.
+		      By the \texttt{action} field they \texttt{addtocart} 359 times and \texttt{purchase} 338 times.
+		      A crawler should never fill forms or buy things.
+		\item \textbf{Probing sensitive files:} 12 bot requests went to \\
+					\texttt{/rush/signals.zip}, \texttt{/hidden/anna\_nicole.html} and \texttt{/passwords.pdf}.
+		\item \textbf{Fake identity:} none of the 1{,}466 ``Googlebot'' requests come from Google's crawler range \texttt{66.249.64.0/19};
+		      they come from 119 random IPs.
+		      The User-Agent header is just text that the client chooses, so these are most likely scrapers/attackers \textbf{pretending to be bots}.
+	\end{itemize}
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+... | chart count over action by bot
+... | eval page=method." ".uri_path | chart count over page by bot
+index=main sourcetype=access_combined_wcookie useragent="*Googlebot*"
+| eval in_google_range=if(cidrmatch("66.249.64.0/19",clientip),"yes","no")
+| stats count by in_google_range
+\end{codingbox*}
+	\shot{p8-action}{Shop actions done by the bots}
+	\shot{p8-pages}{Pages requested by each bot}
+	\shot{p8-googlerange}{No ``Googlebot'' request comes from Google's IP range}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+\section*{Cleaning up}
+% ================================================================================ %
+
+Shut down splunk on your notebook (otherwise, it will keep running in the background).
+Mac users should follow Unix instructions.
+The splunk command is located at \texttt{/Applications/Splunk/bin/}.
+You may uninstall splunk after you are done with this assignment. \\
+\href{http://docs.splunk.com/Documentation/Splunk/latest/Admin/StartSplunk}{http://docs.splunk.com/Documentation/Splunk/latest/Admin/StartSplunk}
+
+% ================================================================================ %
+\section*{Submission}
+% ================================================================================ %
+
+Upload your answers and evidence for your answers (i.e., screenshots, commands) as a pdf.
+
+\end{document}
