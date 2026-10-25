@@ -32,3 +32,7 @@
 
 # Ignore all source directories
 **/src
+
+# Forensic disk images (activity-07 disk.img is 4 GiB; the zip is kept instead)
+**/disk.img
+**/testdisk.log
