@@ -1,0 +1,294 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+\begin{document}
+\subject
+\asgntitle{7}{}{Digital Forensics}{\StudentID\ \StudentName}{\DefaultCollaborators}
+
+% ================================================================================ %
+\section{Overview}
+% ================================================================================ %
+
+Assuming that you are now a digital forensic trainee, we will learn a few tricks on how to gather information.
+In this exercise, we will assume that you are using Linux (Debian).
+There are similar and equivalent tools available on other systems (eg. Windows, Mac OS X) as well.
+
+% ================================================================================ %
+\section{Exercise}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+Where is your home?
+
+Assuming your friend has sent you a picture of him taken at his home.
+You want to find out the location of his home by extracting the EXIF information.
+
+\noindent Here is the sample file.
+\begin{center}
+	\url{https://drive.google.com/file/d/14H93ZHJ9WEU4e-r003MXCxflbvphnAHc/view?usp=sharing}
+\end{center}
+
+\noindent If \texttt{imagemagick} is not install, try
+\begin{codingbox}
+$ sudo apt install imagemagick
+$ 
+\end{codingbox}
+
+\noindent Use `identify' command (from \texttt{imagemagick}) to extract the EXIF information.
+\begin{codingbox}
+$ identify -verbose [img_file.jpg]
+# Or
+$ identify -format '%[EXIF:*]' [img_file.jpg]
+\end{codingbox}
+
+\noindent Find the following information.
+\begin{itemize}
+	\item Device that the picture was taken.
+	\item Date and Time that the picture was taken.
+	\item GeoLocation (Lat/Long) of the location that the picture was taken.
+	      With proper conversion, you can even place it on google map.
+\end{itemize}
+
+\noindent On a modern operating systems (eg. Mac OS X), you can do this directly from the file navigation tool or the image viewer (eg. Preview on Mac OS X).
+\fig*[0.25\linewidth]{images/exif-info.png}{}{}
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Environment:} ImageMagick \texttt{identify} on Ubuntu 22.04 (WSL2), run on the
+	sample file \texttt{IMG\_20191111\_084637.jpg} downloaded from the link above.
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ identify IMG_20191111_084637.jpg
+IMG_20191111_084637.jpg JPEG 3648x1680 3648x1680+0+0 8-bit sRGB 6.76379MiB 0.000u 0:00.000
+$ identify -format '%[EXIF:*]' IMG_20191111_084637.jpg \
+    | grep -E 'Make=|Model=|DateTimeOriginal|GPS(Lat|Long|Date|Time)'
+exif:DateTimeOriginal=2019:11:11 08:46:39
+exif:GPSDateStamp=2019:11:11
+exif:GPSLatitude=13/1, 53/1, 13670654/1000000
+exif:GPSLatitudeRef=N
+exif:GPSLongitude=100/1, 33/1, 59913940/1000000
+exif:GPSLongitudeRef=E
+exif:GPSTimeStamp=1/1, 46/1, 36/1
+exif:Make=HUAWEI
+exif:Model=ELE-L29
+\end{codingbox*}
+
+	\fig*[\linewidth]{images/sol-1-exif.png}{}{}
+
+	\noindent \textbf{Device.} \texttt{Make=HUAWEI}, \texttt{Model=ELE-L29}, i.e.\ a \textbf{Huawei P30}.
+
+	\myspace
+
+	\noindent \textbf{Date and time.} \texttt{DateTimeOriginal} is \textbf{11 November 2019, 08:46:39}
+	(camera local time). The GPS clock stamps the same shot at \texttt{01:46:36} UTC, so the local
+	time is UTC$+$7, which agrees with the location in Thailand.
+
+	\myspace
+
+	\noindent \textbf{GeoLocation.} EXIF stores each coordinate as three rationals
+	(degrees, minutes, seconds), with the hemisphere in the \texttt{Ref} tag.
+	Converting with $\text{decimal} = d + \frac{m}{60} + \frac{s}{3600}$:
+	\begin{align*}
+		\text{Latitude}  & = 13 + \tfrac{53}{60} + \tfrac{13.670654}{3600} \approx \mathbf{13.887131^\circ\,N}  \quad (13^\circ 53' 13.67'' \text{N})   \\
+		\text{Longitude} & = 100 + \tfrac{33}{60} + \tfrac{59.913940}{3600} \approx \mathbf{100.566643^\circ\,E} \quad (100^\circ 33' 59.91'' \text{E})
+	\end{align*}
+	Both references are positive (\texttt{N}, \texttt{E}), so the point is
+	\texttt{13.887131, 100.566643}, in northern Bangkok, Thailand:
+	\begin{center}
+		\url{https://www.google.com/maps?q=13.887131,100.566643}
+	\end{center}
+
+	\fig*[\linewidth]{images/sol-1-map.png}{}{}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 02                                    %
+% ================================================================================ %
+\begin{problem}
+Find a deleted file.
+
+\noindent You are presented with a USB drive that may contain a deleted evidence file.
+Please recover the secret file on the disk.
+\end{problem}
+
+\myspace
+
+\noindent { \large \textbf{Note:} }
+\par You may use the disk image file\textsuperscript{1} that I have prepared and skip the preparation and the first two steps.
+
+\par\noindent \textsuperscript{1} \url{https://drive.google.com/file/d/1iTKoE9M9rxFa6rdh7I1Qh27AHgSpMwDk/view?usp=sharing}
+
+\myspace
+
+\noindent { \large \textbf{Preparation:} }
+\par Create a sample text file on your usb drive (eg. \texttt{secret.txt}). Then delete it.
+
+\myspace
+
+\noindent { \large \textbf{Steps:} }
+\begin{enumerate}
+	\item Plug in the USB drive to a computer (Linux).
+	      Use the lsblk command to identify the device and its partition number.
+	      You should see a device name and partition number (e.g. \texttt{/dev/sdc2}).
+	      \begin{codingbox}
+$ lsblk
+$
+\end{codingbox}
+
+	\item Use the dd command to clone the device and an (disk) image file for offline forensic.
+	      \begin{codingbox}
+$ dd if=/dev/sdc2 of=disk.img bs=4M status=progress
+$
+\end{codingbox}
+
+	\item Install the testdisk tool\textsuperscript{2}. On debian base distribution just do
+	      \begin{codingbox}
+$ apt install testdisk
+$
+\end{codingbox}
+	      \par\noindent \textsuperscript{2} You may download it from \url{https://www.cgsecurity.org/wiki/TestDisk_Download}.
+
+	\item Make a loop device to the \texttt{disk.img} file. Then launch
+	      \begin{codingbox}
+$ testdisk disk.img
+$
+\end{codingbox}
+
+	\item Navigate to the filesystem and recover the deleted file.
+	      \fig*[0.75\linewidth]{images/step-5-01.png}{}{}
+
+	      \noindent Since we dump only the partition, there is no partition map (None).
+	      \fig*[0.75\linewidth]{images/step-5-02.png}{}{}
+
+	      \noindent Select Advanced Filesystem Utils.
+	      \fig*[0.75\linewidth]{images/step-5-03.png}{}{}
+
+	      \noindent Select your partition/filesystem.
+	      \fig*[0.75\linewidth]{images/step-5-04.png}{}{}
+
+	      \noindent List all files.
+	      \fig*[0.75\linewidth]{images/step-5-05.png}{}{}
+
+	      \noindent Select and copy the deleted file out.
+	      \fig*[0.75\linewidth]{images/step-5-06.png}{}{}
+
+	      \noindent Note that the TestDisk tool supports several file systems and partition map schemes.
+	      You may want to experiment with your own system.
+\end{enumerate}
+
+\begin{solution}
+	\noindent \textbf{Environment:} TestDisk 7.1 on Ubuntu 22.04 (WSL2). No USB drive was available,
+	so, as the note allows, I used the prepared disk image and skipped the preparation and steps 1--2
+	(\texttt{lsblk} / \texttt{dd}). Step 4's loop device is not needed either: TestDisk opens the
+	image file directly.
+
+	\myspace
+
+	\noindent \textbf{Inspect the image.} The zip holds a single 4\,GiB \texttt{disk.img}, which is a
+	bare FAT32 filesystem (a partition dump with no partition table):
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ unzip disk.img.zip
+$ file -s disk.img
+disk.img: DOS/MBR boot sector, code offset 0x58+2, OEM-ID "mkfs.fat", sectors/cluster 8,
+Media descriptor 0xf8, sectors/track 63, heads 255, sectors 8388608 (volumes > 32 MB),
+FAT (32 bit), sectors/FAT 8184, serial number 0xb3894437, unlabeled
+\end{codingbox*}
+
+	\noindent \textbf{Recover with TestDisk.} \texttt{testdisk disk.img} $\rightarrow$
+	\texttt{[Proceed]} $\rightarrow$ partition table type \texttt{[None]} (TestDisk itself hints
+	\textit{``None partition table type has been detected''}). For a non-partitioned medium it goes
+	straight to the filesystem menu, where \texttt{[Undelete]} (\textit{File undelete}) is the
+	same tool as \textit{Advanced} $\rightarrow$ \textit{Undelete} in the handout's screenshots:
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+Disk disk.img - 4294 MB / 4096 MiB - CHS 523 255 63
+
+     Partition                  Start        End    Size in sectors
+>   P FAT32                    0   0  1   522  42 32    8388608 [NO NAME]
+
+ [  Type  ]  [  Boot  ] >[Undelete]  [Image Creation]  [  Quit  ]
+                                 File undelete
+\end{codingbox*}
+
+	\noindent TestDisk lists the deleted entries of \texttt{/} (shown in red in the UI); the only
+	one with data is \texttt{secret.txt} (89 bytes, last written 15-Nov-2019 01:12). Pressing
+	\texttt{c} on it and then \texttt{C} to accept the current directory as the destination copies
+	it out:
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+   P FAT32                    0   0  1   522  42 32    8388608 [NO NAME]
+Directory /secret.txt
+Copy done! 1 ok, 0 failed
+>-rwxr-xr-x     0     0        89 15-Nov-2019 01:12 secret.txt
+
+Use Right to change directory, h to hide deleted files
+    q to quit, : to select the current file, a to select all files
+    C to copy the selected files, c to copy the current file
+\end{codingbox*}
+
+	\fig*[\linewidth]{images/sol-2-testdisk-undelete.png}{}{}
+
+	\noindent \textbf{The recovered secret file:}
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ cat secret.txt
+This is a secretly deleted file.
+
+The demonstration is created by Krerk Piromsopa, Ph.D.
+$ 
+\end{codingbox*}
+
+	\fig*[\linewidth]{images/sol-2-recovered.png}{}{}
+
+	\myspace
+
+	\noindent \textbf{Cross-check with The Sleuth Kit.} \texttt{fls} marks deleted entries with
+	\texttt{*}. Besides \texttt{secret.txt} it also finds the leftovers of the editor used to write
+	it (Vim's \texttt{.secret.txt.swp} and its 8.3 short name \texttt{\_ECRET\textasciitilde1.SWX}).
+	\texttt{icat -r} recovers the same 89 bytes from inode 7:
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, xleftmargin=0pt, belowskip=6pt, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ fls -r -d disk.img
+r/r * 5:	.secret.txt.swp
+r/r * 7:	secret.txt
+r/r * 8:	_ECRET~1.SWX
+$ icat -r disk.img 7
+This is a secretly deleted file.
+
+The demonstration is created by Krerk Piromsopa, Ph.D.
+\end{codingbox*}
+
+	\noindent \textbf{Why it works.} Deleting a file on FAT only marks its directory entry as free
+	(the first byte of the name becomes \texttt{0xE5}) and releases its clusters in the FAT; the
+	data itself stays on disk until something overwrites it. The entry still holds the starting
+	cluster and the file size, so a tool can read the data straight back.
+\end{solution}
+% ================================================================================ %
+
+\myspace
+
+\begin{center}
+	{ \LARGE \textbf{Enjoy!} }
+\end{center}
+
+\end{document}
