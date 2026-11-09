@@ -1,0 +1,267 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+\begin{document}
+\subject
+\asgntitle{9}{}{Network Scanner with NMAP}{\StudentID\ \StudentName}{\DefaultCollaborators}
+
+% ================================================================================ %
+\section{Overview}
+% ================================================================================ %
+
+We will use NMAP (``Network Mapper'') to extract various information about host and environment information.
+Please install nmap.
+You may install it from the package in your system distribution.
+Alternatively, you may get it from \url{https://nmap.org/book/install.html}.
+If preferred, you may install the GUI version (zenmap).
+
+% ================================================================================ %
+\section{Exercise}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+Please connect to your university network (e.g ChulaWIFI or eduroam).
+We will use a simple ping scan to identify online hosts. eg.
+\begin{codingbox}
+$ nmap -v -sn 10.201.3.0/24
+$
+\end{codingbox}
+
+\noindent Don't forget to substitute \texttt{10.201.3.0} with your network address.
+Please explain the parameters (-sn).
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{What the command does.} It performs \emph{host discovery only} over the whole
+	\texttt{/24} subnet (256 addresses, \texttt{.0}--\texttt{.255}) and lists which hosts are online,
+	without scanning any of their ports.
+
+	\myspace
+
+	\noindent \textbf{The parameters.}
+	\begin{itemize}
+		\item \texttt{-sn} --- \emph{``ping scan / no port scan''} (older name \texttt{-sP}). It tells
+		      nmap to run \emph{only} the host-discovery stage and skip the port-scan stage, so the
+		      output is simply the list of live hosts. For discovery nmap does not rely on a plain
+		      ICMP echo alone: on the local link, run as root, it sends \textbf{ARP requests} (the most
+		      reliable on a LAN); to off-link hosts it sends a mix of \textbf{ICMP echo}, \textbf{ICMP
+		      timestamp}, a \textbf{TCP SYN to port 443} and a \textbf{TCP ACK to port 80}, and marks a
+		      host ``up'' if any probe gets a reply.
+		\item \texttt{-v} --- \emph{verbose}: prints more detail and reports hosts as they are found
+		      (use \texttt{-vv} for even more).
+		\item \texttt{10.201.3.0/24} --- the target in CIDR notation, i.e.\ the 256-address block
+		      \texttt{10.201.3.0}--\texttt{10.201.3.255}.
+	\end{itemize}
+
+	\noindent \textbf{Run it as root.} ARP discovery and raw packets need privileges; otherwise nmap
+	silently falls back to a less reliable unprivileged method.
+
+	\myspace
+
+	\begin{codingbox*}[numbers=none, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ ip -4 addr show eth2 | grep inet          # my address on ChulaWiFi
+    inet 10.203.237.69/16 brd 10.203.255.255 scope global eth2
+$ sudo nmap -v -sn 10.203.237.0/24
+\end{codingbox*}
+
+	\noindent \textbf{Result.} Connected to ChulaWiFi, my machine got \texttt{10.203.237.69}, so I
+	scanned the \texttt{/24} around it, \texttt{10.203.237.0/24} (Figure~\ref{fig:sol1}). In about
+	10\,s, 2 of 256 addresses were up: my own machine and \texttt{10.203.237.236}. The other host's
+	MAC, \texttt{02:51:B6:34:83:81}, has the \emph{locally administered} bit set (\texttt{02:}\dots).
+	That means it is a randomized ``private'' Wi-Fi address, as used by modern phones and laptops,
+	so nmap cannot map it to a vendor (\texttt{Unknown}). Only two hosts showed up because the
+	ChulaWiFi subnet is a whole \texttt{/16}, so this small \texttt{/24} slice holds few of its
+	clients. Across the full \texttt{/16} the Problem~3 scan found 373 hosts up.
+
+	\fig[0.7\linewidth]{images/sol-1-ping.png}{Ping scan of \texttt{10.203.237.0/24} on ChulaWiFi: 2 hosts up.}{sol1}
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 02                                    %
+% ================================================================================ %
+\begin{problem}
+Pick an ip address from the list in exercise 1 (maybe get the ip address of your friend).
+We will try to detect the OS from the network footprint. eg.
+\begin{codingbox}
+$ nmap -v --osscan-guess 10.201.3.250
+$
+\end{codingbox}
+
+Experiment with several operating systems (Windows, Linux, Mac OS X, iPhone, Android Phone, etc.)
+Explain how nmap identifies the operating system.
+You may use -A (Aggressive scan options) to get the result as well.
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{The commands (run as root).}
+
+	\myspace[v][1]
+
+	\begin{codingbox*}[numbers=none, breaklines=true, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ sudo nmap -v --osscan-guess -O 10.203.255.254   # OS detection, guess if no exact match
+$ sudo nmap -v -A                10.203.255.254   # aggressive: OS + version + scripts + traceroute
+\end{codingbox*}
+
+	\myspace
+
+	\noindent \textbf{How nmap identifies the operating system.} It uses \textbf{TCP/IP stack
+	fingerprinting}. Every OS implements the TCP/IP stack with slightly different default behaviour,
+	so nmap sends a series of crafted probes (TCP packets to an open and a closed port, a UDP packet
+	to a closed port, and ICMP messages) and examines exactly \emph{how} the host replies. The
+	tell-tale features it measures include:
+	\begin{itemize}
+		\item initial \textbf{TTL} and TCP \textbf{window size};
+		\item the set and \textbf{ordering of TCP options} (MSS, window scale, timestamps, SACK, NOPs);
+		\item the \textbf{ISN} (initial sequence number) generation pattern and the IP ID sequence;
+		\item the \textbf{DF} (don't-fragment) bit, ECN support, and how the host answers unusual flag
+		      combinations and ICMP requests.
+	\end{itemize}
+	These values are assembled into a fingerprint and matched against nmap's database
+	(\texttt{nmap-os-db}); the closest matches are reported, each with a confidence. Reliable
+	detection needs \textbf{at least one open and one closed port}; \texttt{--osscan-guess} relaxes
+	the matching so nmap prints its nearest guesses even when there is no perfect match.
+
+	\myspace
+
+	\noindent \textbf{What \texttt{-A} adds.} It bundles \textbf{OS detection} (\texttt{-O}),
+	\textbf{version detection} (\texttt{-sV}), \textbf{default NSE scripts} (\texttt{-sC}) and
+	\textbf{traceroute} into one aggressive scan --- giving extra corroborating evidence (open-port
+	service banners often name the OS directly, e.g.\ \texttt{Windows} in an SMB banner).
+
+	\myspace
+
+	\noindent \textbf{Expected reality for phones.} iPhones and Androids (and any firewalled host)
+	are often hard to fingerprint: you will frequently see ``\texttt{No exact OS matches}'' or ``\texttt{Too
+	many fingerprints match}'', and MAC-address randomization hides the vendor. Low accuracy here is a
+	normal result worth noting, not a mistake.
+
+	\myspace[v][1]
+
+	\noindent \textbf{My results.} I scanned three targets on ChulaWiFi: the default gateway, an
+	iPad and an Android phone (IPs read from each device's Wi-Fi settings).
+
+	\myspace[v][1]
+
+	\begin{center}
+	\begin{tabular}{|l|l|p{0.2\linewidth}|p{0.34\linewidth}|}
+		\hline
+		\textbf{Device} & \textbf{Target IP} & \textbf{nmap's OS guess} & \textbf{Notes} \\
+		\hline
+		Gateway (router) & \texttt{10.203.255.254} & None (too many matches) &
+		    Up, 1 hop away. MAC OUI \texttt{F4:DB:E6} = \textbf{Cisco Systems}. All 1000 ports
+		    \emph{filtered}. \\
+		iPad             & \texttt{10.203.234.227} & None (host down) & No ARP reply, so nothing to fingerprint. \\
+		Android phone    & \texttt{10.203.97.114}  & None (host down) & No ARP reply, so nothing to fingerprint. \\
+		\hline
+	\end{tabular}
+	\end{center}
+
+	\fig[0.70\linewidth]{images/sol-2-osscan.png}{OS detection on ChulaWiFi: the gateway (top) and the two phones (bottom).}{sol2}
+
+	\noindent \textbf{Why OS detection failed.} The results (Figure~\ref{fig:sol2}) show the limits
+	described above:
+	\begin{itemize}
+		\item \textbf{Gateway.} The host is clearly up, but \emph{every} scanned port is filtered: it
+		      silently drops the probes and sends no SYN/ACK or RST. Without at least one open and one
+		      closed port, nmap cannot build the TCP fingerprint, so many OS signatures fit equally
+		      well. The only identifying evidence came from layer~2: the MAC address's OUI shows the
+		      device is Cisco hardware, which is typical of campus network gear. That is a good example
+		      of evidence outside the TCP/IP fingerprint.
+		\item \textbf{iPad and Android.} Both were on-link, so nmap tried ARP. Neither answered, and
+		      nmap marked them down in under a second. Likely reasons, all common on campus Wi-Fi:
+		      \emph{client isolation} on the access points, which blocks client-to-client traffic;
+		      Wi-Fi power saving on an idle phone; and the phones' firewalls. Mobile OSes expose
+		      no listening ports by default, so even a reachable phone usually gives a weak
+		      fingerprint. Adding \texttt{-Pn} skips host discovery, but it cannot help when the
+		      network itself drops the frames.
+	\end{itemize}
+	\noindent In short, OS fingerprinting only works well against hosts that are reachable and
+	expose a mix of open and closed ports, such as servers and lab machines. Firewalled phones and
+	infrastructure behind a filtering policy do not.
+\end{solution}
+% ================================================================================ %
+
+% ================================================================================ %
+%                                    Problem 03                                    %
+% ================================================================================ %
+\begin{problem}
+Assuming that you are asked to identify all web servers on a campus, which command will you use to obtain the information.
+Please explain with an explicit example.
+\end{problem}
+
+\begin{solution}
+	\noindent \textbf{Idea.} A web server is simply a host with an \textbf{HTTP/HTTPS port open}
+	(typically \texttt{80} and \texttt{443}, plus common alternates \texttt{8080}/\texttt{8443}).
+	So scan the whole campus range for just those ports, keep only the hosts that answer, and use
+	version detection to confirm each one really is a web server (and which one).
+
+	\myspace
+
+	\noindent \textbf{Command.}
+
+	\myspace[v][1]
+
+	\begin{codingbox*}[numbers=none, breaklines=true, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ sudo nmap -T4 -p 80,443,8080,8443 --open -sV --script http-title \
+            10.203.0.0/16 -oA campus-webservers
+$
+\end{codingbox*}
+
+	\myspace
+
+	\noindent Breaking it down:
+	\begin{itemize}
+		\item \texttt{-p 80,443,8080,8443} --- scan only the web ports (fast across a large range).
+		\item \texttt{--open} --- report only hosts that actually have one of those ports open, so the
+		      output \emph{is} the list of web servers.
+		\item \texttt{-sV} --- \emph{version detection}: confirms the port speaks HTTP and names the
+		      server software (e.g.\ \texttt{Apache httpd 2.4.x}, \texttt{nginx}, \texttt{Microsoft IIS}).
+		\item \texttt{-{}-script http-title} --- an NSE script that grabs each site's page title, handy
+		      for telling the servers apart.
+		\item \texttt{-T4} --- the ``aggressive'' timing template: shorter timeouts and more
+		      parallelism, which matters when sweeping tens of thousands of addresses.
+		\item \texttt{10.203.0.0/16} --- the campus range to sweep (use the real one; \texttt{/16} is
+		      65k addresses, so narrow it to the relevant subnets if it is too slow, or add
+		      \texttt{-Pn} if hosts block ping).
+		\item \texttt{-oA campus-webservers} --- save results in all formats; the \emph{greppable}
+		      file makes it easy to extract just the IPs, e.g.:
+	\end{itemize}
+
+	\begin{codingbox*}[numbers=none, basicstyle=\ttfamily\footnotesize\color{editortext}]
+$ grep -E "80/open|443/open" campus-webservers.gnmap | awk '{print $2}'
+\end{codingbox*}
+
+	\noindent \textbf{Result.} I ran this against the whole ChulaWiFi range, \texttt{10.203.0.0/16}
+	(Figure~\ref{fig:sol3}). The sweep took about 14.5 minutes (867\,s) and found \textbf{373 live
+	hosts}, but \textbf{none} had 80, 443, 8080 or 8443 open, so the web-server list is empty.
+	This is the expected answer for this range. \texttt{10.203.0.0/16} is the Wi-Fi
+	\emph{client} pool: students' phones and laptops get DHCP addresses there, and with client
+	isolation and host firewalls they do not offer services to each other. The university's web
+	servers live in its server or data-centre subnets and its public address block. To inventory
+	them, you would first find those ranges (from the network team, or from DNS and \texttt{whois}
+	for the university's domain) and run the same command on them, with permission from the
+	network administrators. Adding \texttt{-Pn} helps there if servers drop ping.
+
+	\fig[0.95\linewidth]{images/sol-3-web.png}{Web-server sweep of the ChulaWiFi range \texttt{10.203.0.0/16}: 373 hosts up, none serving HTTP(S).}{sol3}
+\end{solution}
+% ================================================================================ %
+
+\myspace
+
+\par\noindent There are several things that can be done with nmap.
+Please refer to \url{https://nmap.org/book/man.html} for more information.
+
+\myspace
+
+\begin{center}
+	{ \LARGE \textbf{Enjoy!} }
+\end{center}
+
+\end{document}
